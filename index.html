@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A no-install demo of Chromium's local+ external protocol blocking.">
+  <title>local+ protocol demo</title>
+  <style>
+    :root { color-scheme: light dark; font: 17px/1.6 system-ui, sans-serif; }
+    body { max-width: 820px; margin: 0 auto; padding: 32px 20px 56px; }
+    h1, h2 { line-height: 1.2; }
+    h1 { font-size: clamp(2rem, 7vw, 3rem); margin-bottom: 12px; }
+    h2 { margin-top: 36px; font-size: 1.35rem; }
+    a { color: light-dark(#174bb3, #9cc1ff); }
+    code { font-size: .9em; overflow-wrap: anywhere; }
+    .intro { font-size: 1.15rem; }
+    .notice, .card { border: 1px solid light-dark(#b9c4d1, #586577); border-radius: 12px; padding: 20px; }
+    .notice { background: light-dark(#f0f5ff, #172536); }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 24px; }
+    .card h2 { margin-top: 0; }
+    .launch { display: inline-block; padding: 10px 16px; border: 2px solid currentColor; border-radius: 8px; font-weight: 650; text-decoration: none; }
+    .launch:hover { text-decoration: underline; }
+    :focus-visible { outline: 3px solid light-dark(#7a3e00, #ffd08a); outline-offset: 4px; }
+    li + li { margin-top: 10px; }
+    footer { margin-top: 40px; border-top: 1px solid light-dark(#b9c4d1, #586577); padding-top: 20px; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1><code>local+</code> protocol demo</h1>
+    <p class="intro">Two links. No app to install. See where Chromium stops a webpage from opening a local-only app protocol.</p>
+    <p class="notice"><strong>Browser setup required.</strong> Use a desktop Chromium-based build containing
+      <a href="https://chromium-review.googlesource.com/c/chromium/src/+/8382199">change 8382199</a>
+      and explicitly enable <code>LocalOnlyAppProtocolPrefix</code>.
+      The change landed disabled by default. This page cannot enable or detect the feature.
+      See the <a href="https://github.com/victorhuangwq/local-plus-protocol-demo#browser-setup">Windows and macOS launch instructions</a>.</p>
+
+    <h2>Try it</h2>
+    <ol>
+      <li>Open DevTools with <kbd>F12</kbd> or <kbd>Ctrl+Shift+J</kbd> on Windows,
+        or <kbd>Command+Option+J</kbd> on macOS. Select <strong>Console</strong> and make sure errors are visible.</li>
+      <li>Click each link below separately. Compare the browser's console messages.
+        The page may look unchanged; the console is the evidence.</li>
+    </ol>
+
+    <div class="cards">
+      <section class="card" aria-labelledby="ordinary-heading">
+        <h2 id="ordinary-heading">Ordinary protocol</h2>
+        <p><code>toydemo:hello</code></p>
+        <a class="launch" href="toydemo:hello">Try ordinary protocol</a>
+        <p><strong>Expected:</strong> normal external-handler lookup. On Windows and macOS with no app registered,
+          the console reports that the scheme has no registered handler.</p>
+      </section>
+      <section class="card" aria-labelledby="local-heading">
+        <h2 id="local-heading">Local-only protocol</h2>
+        <p><code>local+toydemo:hello</code></p>
+        <a class="launch" href="local+toydemo:hello">Try local-only protocol</a>
+        <p><strong>Expected with the feature enabled:</strong> the browser blocks the request before handler lookup:</p>
+        <p><code>Not allowed to launch 'local+toydemo:hello'.</code></p>
+      </section>
+    </div>
+
+    <h2>What this demonstrates</h2>
+    <p>The browser checks the requested scheme for the literal <code>local+</code> prefix.
+      <code>toydemo:</code> and <code>local+toydemo:</code> are independent names, not aliases.
+      Even a deliberate click on a webpage is web-initiated.</p>
+    <p>These are expected outcomes, not live status indicators. A webpage cannot reliably tell whether an
+      external app launched or read these browser-generated console messages.</p>
+    <p>No app is supplied or installed. If you already have an app registered for either demo scheme, the ordinary
+      launch flow may offer to open it; cancel that prompt if you do not want to open the app.</p>
+
+    <h2>If both links behave the same</h2>
+    <p>Check that your browser actually contains the change and that you launched a separate test instance with
+      <code>--enable-features=LocalOnlyAppProtocolPrefix</code>. An older browser can accept an unknown feature
+      flag without implementing it. A fresh profile does not remove device-level enterprise policies.</p>
+    <p>As a control, use the same compatible browser in another fresh profile with
+      <code>--disable-features=LocalOnlyAppProtocolPrefix</code>. Both links should then follow normal
+      handler lookup, assuming no overriding policies or other restrictions.</p>
+
+    <h2>Limits</h2>
+    <p>This demonstrates rejection, not successful app launching. Typing a local-only URL directly into the
+      address bar retains the normal launch flow, but opening an app still requires a registered handler.</p>
+    <p>This is browser enforcement, not OS access control. Administrator policies
+      <code>AutoLaunchProtocolsFromOrigins</code> and applicable <code>URLAllowlist</code> settings can override
+      the block; remembered user allowances cannot. Other browsers or builds may behave differently.</p>
+  </main>
+  <footer>
+    <a href="https://github.com/victorhuangwq/local-plus-protocol-demo">Source and setup instructions</a>
+    &middot;
+    <a href="https://chromium-review.googlesource.com/c/chromium/src/+/8382199">Chromium change</a>
+  </footer>
+</body>
+</html>
