@@ -16,41 +16,42 @@ The page cannot read browser-generated console messages or reliably detect an ex
 
 ## Browser setup
 
-Use a desktop Chromium-based build containing [Chromium change 8382199](https://chromium-review.googlesource.com/c/chromium/src/+/8382199),
-merged September 23, 2026, as commit `51e74b2fa6a88d7da47643160bb990468ff82c02`
-(main position `1703676`). It introduced `LocalOnlyAppProtocolPrefix`, disabled by default.
-Landing upstream does not establish availability in any particular Chrome or Edge release.
-An unknown `--enable-features` name can be silently accepted by an older build, so the flag alone is not proof of support.
+Use the latest **Chrome Canary** or **Edge Canary** and explicitly enable `LocalOnlyAppProtocolPrefix`.
 
-Launch your compatible browser with a fresh, dedicated test profile. This avoids reusing an existing process
-that was started without the feature flag and keeps your normal browser profile separate.
-Do not disable browser security protections.
+Run one command below, then open the demo in the new browser window.
+The extra `--user-data-dir` flag keeps the demo separate from your normal browser.
+Close any previous demo window before running the command again.
 
 ### Windows (PowerShell)
 
-Replace the executable path with the compatible browser you intend to test:
+Chrome Canary:
 
 ```powershell
-$browser = 'C:\path\to\compatible-browser.exe'
-$profile = Join-Path $env:TEMP ('local-plus-demo-' + [guid]::NewGuid())
-& $browser "--user-data-dir=$profile" '--enable-features=LocalOnlyAppProtocolPrefix' 'https://victorhuangwq.github.io/local-plus-protocol-demo/'
+& "$env:LOCALAPPDATA\Google\Chrome SxS\Application\chrome.exe" --user-data-dir="$env:TEMP\local-plus-chrome" --enable-features=LocalOnlyAppProtocolPrefix
+```
+
+Edge Canary:
+
+```powershell
+& "$env:LOCALAPPDATA\Microsoft\Edge SxS\Application\msedge.exe" --user-data-dir="$env:TEMP\local-plus-edge" --enable-features=LocalOnlyAppProtocolPrefix
 ```
 
 ### macOS (Terminal)
 
-Replace the executable path with the compatible browser you intend to test.
-For example, a Chrome Canary installation normally uses the path shown below, but its version must still contain the change:
+Chrome Canary:
 
 ```sh
-BROWSER='/Applications/Google Chrome Canary.app/Contents/MacOS/Google Chrome Canary'
-PROFILE="$(mktemp -d -t local-plus-demo)"
-"$BROWSER" --user-data-dir="$PROFILE" --enable-features=LocalOnlyAppProtocolPrefix \
-  'https://victorhuangwq.github.io/local-plus-protocol-demo/'
+open -na "Google Chrome Canary" --args --user-data-dir="$TMPDIR/local-plus-chrome" --enable-features=LocalOnlyAppProtocolPrefix
 ```
 
-These commands launch a browser, not an app handler or installer. They create a test profile in your temporary
-directory. Close that test browser when finished; you can then remove its specific profile folder.
-Do not delete your normal browser profile.
+Edge Canary:
+
+```sh
+open -na "Microsoft Edge Canary" --args --user-data-dir="$TMPDIR/local-plus-edge" --enable-features=LocalOnlyAppProtocolPrefix
+```
+
+The commands use standard Canary installation locations and store demo profiles in your temporary directory.
+Nothing else is installed.
 
 ## Walkthrough
 
@@ -65,7 +66,7 @@ Click each link separately so ordinary user-gesture and launch-throttling behavi
 If an app happens to be registered for a demo scheme, the ordinary flow may show an app-opening prompt instead;
 cancel it unless you intend to open that app.
 
-For an A/B comparison, launch the same compatible browser in another fresh profile, replacing
+For an A/B comparison, close the demo browser, change the profile folder name to end in `-off`, and replace
 `--enable-features=LocalOnlyAppProtocolPrefix` with `--disable-features=LocalOnlyAppProtocolPrefix`.
 Both links should then reach normal handler lookup, absent other restrictions.
 
