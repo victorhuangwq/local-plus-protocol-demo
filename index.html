@@ -137,12 +137,18 @@
       <code>--disable-features=LocalOnlyAppProtocolPrefix</code>. Both links should then follow normal
       handler lookup, assuming no overriding policies or other restrictions.</p>
 
-    <h2>What this does not demonstrate</h2>
-    <p>This demonstrates rejection, not successful app launching. Typing a local-only URL directly into the
-      address bar retains the normal launch flow, but opening an app still requires a registered handler.</p>
-    <p>This is browser enforcement, not OS access control. Administrator policies
-      <code>AutoLaunchProtocolsFromOrigins</code> and applicable <code>URLAllowlist</code> settings can override
-      the block; remembered user allowances cannot. Other browsers or builds may behave differently.</p>
+    <h2>What to expect in your own app</h2>
+    <p><strong>This demo only shows the browser blocking a website's request.</strong>
+      It doesn't install an app, so there's nothing to open. To test an actual launch, first register
+      a <code>local+</code> URL scheme with your app.</p>
+    <p><strong>A website link and an address-bar entry are different.</strong>
+      With the feature enabled, a website can't launch your <code>local+</code> URL.
+      A user can still enter that URL directly in the address bar and follow the browser's usual
+      app-opening prompt. Other native apps can also open the URL through the OS.</p>
+    <p><strong>The restriction depends on the browser.</strong> It isn't enforced by Windows or macOS,
+      and browsers without the feature may still allow website launches. On managed devices, an administrator
+      can make exceptions using <code>AutoLaunchProtocolsFromOrigins</code> or, where supported,
+      <code>URLAllowlist</code>. A user's previously saved permission to open the app does not bypass the block.</p>
   </main>
   <footer>
     <a href="https://github.com/victorhuangwq/local-plus-protocol-demo">Source code</a>
