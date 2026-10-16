@@ -86,7 +86,7 @@
     <ol>
       <li>Enable the feature using <strong>Set up your test browser</strong> above.</li>
       <li>Open DevTools with <kbd>F12</kbd> or <kbd>Ctrl+Shift+J</kbd> on Windows,
-        or <kbd>Command+Option+J</kbd> on macOS. Select <strong>Console</strong> and make sure errors are visible.</li>
+        or <kbd>Command+Option+J</kbd> on macOS. Select <strong>Console</strong> and make sure Info and Error messages are visible.</li>
       <li>Click each link below separately. Compare the browser's console messages.
         The page may look unchanged; the console is the evidence.</li>
     </ol>
@@ -109,7 +109,8 @@
       </section>
     </div>
 
-    <p>Even a deliberate click on a webpage is web-initiated.</p>
+    <p>Each click logs the requested protocol. This is a page-generated message, not confirmation that the browser
+      searched for or found an app. Even a deliberate click on a webpage is web-initiated.</p>
     <p>These are expected outcomes, not live status indicators. A webpage cannot reliably tell whether an
       external app launched or read these browser-generated console messages.</p>
     <p>No app is supplied or installed. If you already have an app registered for either demo scheme, the ordinary
@@ -135,5 +136,12 @@
     &middot;
     <a href="https://chromium-review.googlesource.com/c/chromium/src/+/8382199">Chromium change</a>
   </footer>
+  <script>
+    for (const link of document.querySelectorAll('a.launch')) {
+      link.addEventListener('click', () => {
+        console.log(`Searching for ${new URL(link.href).protocol} (launch requested; see the browser's result below).`);
+      });
+    }
+  </script>
 </body>
 </html>
