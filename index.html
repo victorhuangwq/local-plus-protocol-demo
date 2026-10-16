@@ -67,21 +67,21 @@
     <details id="browser-setup">
       <summary>Set up your test browser</summary>
       <p>Use the latest <strong>Chrome Canary</strong> or <strong>Edge Canary</strong>.
-        Run one command below, then open this page in the new window.
-        The <code>--user-data-dir</code> flag keeps the demo separate from your normal browser.
-        Close any previous demo window before running the command again.</p>
+        Fully quit that browser, including any background processes, before running one command below.
+        Then open this page in the new window. These commands use your normal Canary profile,
+        including its existing settings and sign-ins.</p>
       <h3>Windows (PowerShell)</h3>
       <p>Chrome Canary:</p>
-      <pre><code>&amp; "$env:LOCALAPPDATA\Google\Chrome SxS\Application\chrome.exe" --user-data-dir="$env:TEMP\local-plus-chrome" --enable-features=LocalOnlyAppProtocolPrefix</code></pre>
+      <pre><code>&amp; "$env:LOCALAPPDATA\Google\Chrome SxS\Application\chrome.exe" --enable-features=LocalOnlyAppProtocolPrefix</code></pre>
       <p>Edge Canary:</p>
-      <pre><code>&amp; "$env:LOCALAPPDATA\Microsoft\Edge SxS\Application\msedge.exe" --user-data-dir="$env:TEMP\local-plus-edge" --enable-features=LocalOnlyAppProtocolPrefix</code></pre>
+      <pre><code>&amp; "$env:LOCALAPPDATA\Microsoft\Edge SxS\Application\msedge.exe" --enable-features=LocalOnlyAppProtocolPrefix</code></pre>
       <h3>macOS (Terminal)</h3>
       <p>Chrome Canary:</p>
-      <pre><code>open -na "Google Chrome Canary" --args --user-data-dir="$TMPDIR/local-plus-chrome" --enable-features=LocalOnlyAppProtocolPrefix</code></pre>
+      <pre><code>open -a "Google Chrome Canary" --args --enable-features=LocalOnlyAppProtocolPrefix</code></pre>
       <p>Edge Canary:</p>
-      <pre><code>open -na "Microsoft Edge Canary" --args --user-data-dir="$TMPDIR/local-plus-edge" --enable-features=LocalOnlyAppProtocolPrefix</code></pre>
-      <p>These commands use standard Canary installation locations and store demo profiles in your temporary directory.
-        Nothing else is installed. This page cannot enable or detect the feature.</p>
+      <pre><code>open -a "Microsoft Edge Canary" --args --enable-features=LocalOnlyAppProtocolPrefix</code></pre>
+      <p>These commands use standard Canary installation locations. Nothing else is installed.
+        This page cannot enable or detect the feature.</p>
     </details>
     <ol>
       <li>Enable the feature using <strong>Set up your test browser</strong> above.</li>
@@ -116,10 +116,10 @@
       launch flow may offer to open it; cancel that prompt if you do not want to open the app.</p>
 
     <h2>If both links behave the same</h2>
-    <p>Update Chrome Canary or Edge Canary and launch a separate test instance with
+    <p>Update Chrome Canary or Edge Canary, fully quit it, and relaunch with
       <code>--enable-features=LocalOnlyAppProtocolPrefix</code>. An older browser can accept an unknown feature
-      flag without implementing it. A fresh profile does not remove device-level enterprise policies.</p>
-    <p>As a control, use the same compatible browser in another fresh profile with
+      flag without implementing it. Enterprise policies can also affect the result.</p>
+    <p>As a control, fully quit the same compatible browser and relaunch with
       <code>--disable-features=LocalOnlyAppProtocolPrefix</code>. Both links should then follow normal
       handler lookup, assuming no overriding policies or other restrictions.</p>
 
