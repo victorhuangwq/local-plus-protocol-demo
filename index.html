@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="A no-install demo of Chromium's local+ external protocol blocking.">
+  <meta name="description" content="Learn when and how to use local+ URL schemes in Windows and macOS apps, then try a no-install browser demo.">
   <title>local+ protocol demo</title>
   <style>
     :root { color-scheme: light dark; font: 17px/1.6 system-ui, sans-serif; }
@@ -22,20 +22,69 @@
     .launch:hover { text-decoration: underline; }
     :focus-visible { outline: 3px solid light-dark(#7a3e00, #ffd08a); outline-offset: 4px; }
     li + li { margin-top: 10px; }
+    h3 { font-size: 1.1rem; }
+    table { width: 100%; border-collapse: collapse; margin: 20px 0; table-layout: fixed; }
+    th, td { text-align: left; vertical-align: top; padding: 10px; border-bottom: 1px solid light-dark(#b9c4d1, #586577); overflow-wrap: anywhere; }
+    details { margin: 20px 0; border: 1px solid light-dark(#b9c4d1, #586577); border-radius: 12px; padding: 16px; }
+    summary { cursor: pointer; font-weight: 650; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; background: light-dark(#f0f5ff, #172536); border-radius: 8px; }
     footer { margin-top: 40px; border-top: 1px solid light-dark(#b9c4d1, #586577); padding-top: 20px; }
   </style>
 </head>
 <body>
   <main>
-    <h1><code>local+</code> protocol demo</h1>
-    <p class="intro">Two links. No app to install. See where Chromium stops a webpage from opening a local-only app protocol.</p>
-    <p class="notice"><strong>Browser setup required.</strong> Use the latest Chrome Canary or Edge Canary
-      and explicitly enable <code>LocalOnlyAppProtocolPrefix</code>.
-      This page cannot enable or detect the feature.
-      See the <a href="https://github.com/victorhuangwq/local-plus-protocol-demo#browser-setup">Windows and macOS launch instructions</a>.</p>
+    <h1>Should websites be able to open your app?</h1>
+    <p class="intro">Use <code>local+</code> for app entry points that other native apps need to call,
+      but websites should not launch.</p>
+    <p>Your Windows or macOS app may already handle custom URLs such as <code>myapp:hello</code>.
+      In supporting browsers with the feature enabled, registering a scheme beginning with <code>local+</code>
+      blocks web-initiated launches of that scheme. Native apps can still call it through the OS.</p>
 
-    <h2>Try it</h2>
+    <h2>What changes for your app</h2>
+    <table>
+      <caption>Ordinary and local-only entry points</caption>
+      <thead><tr><th scope="col">What you do</th><th scope="col">Ordinary</th><th scope="col">Local-only</th></tr></thead>
+      <tbody>
+        <tr><th scope="row">Register a scheme</th><td><code>myapp:</code></td><td><code>local+myapp:</code></td></tr>
+        <tr><th scope="row">Open a URL from another native app through the OS</th><td><code>myapp:hello</code></td><td><code>local+myapp:hello</code></td></tr>
+        <tr><th scope="row">Open a website link in a supporting browser with the feature enabled</th><td>Normal app-opening flow</td><td>Blocked</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Windows:</strong> register <code>local+myapp</code> using your usual protocol-registration mechanism.
+      <strong>macOS:</strong> declare <code>local+myapp</code> in your app's URL schemes.
+      Registration uses the scheme name without the trailing colon.</p>
+    <p>Update callers to open the full URL, such as <code>local+myapp:hello</code>, and make sure your handler accepts
+      the new scheme. The OS dispatches that URL to your app as usual.</p>
+    <p><strong>This is a new protocol name, not a setting on the old one.</strong>
+      There is no automatic mapping from <code>myapp:</code> to <code>local+myapp:</code>.
+      Keeping the old scheme wired to the same functionality leaves that entry point reachable from websites.</p>
+    <p class="notice"><strong>Keep validating incoming URLs.</strong> This is a browser restriction, not authentication
+      or OS-level protection. Unsupported browsers may not enforce it, and administrator policies can override it.</p>
+
+    <h2>See the browser block, no app installation needed</h2>
+    <p>The links below use <code>toydemo:</code> and <code>local+toydemo:</code>.
+      No demo app is installed: compare a request that reaches app lookup with one the browser rejects before lookup.</p>
+    <details id="browser-setup">
+      <summary>Set up your test browser</summary>
+      <p>Use the latest <strong>Chrome Canary</strong> or <strong>Edge Canary</strong>.
+        Run one command below, then open this page in the new window.
+        The <code>--user-data-dir</code> flag keeps the demo separate from your normal browser.
+        Close any previous demo window before running the command again.</p>
+      <h3>Windows (PowerShell)</h3>
+      <p>Chrome Canary:</p>
+      <pre><code>&amp; "$env:LOCALAPPDATA\Google\Chrome SxS\Application\chrome.exe" --user-data-dir="$env:TEMP\local-plus-chrome" --enable-features=LocalOnlyAppProtocolPrefix</code></pre>
+      <p>Edge Canary:</p>
+      <pre><code>&amp; "$env:LOCALAPPDATA\Microsoft\Edge SxS\Application\msedge.exe" --user-data-dir="$env:TEMP\local-plus-edge" --enable-features=LocalOnlyAppProtocolPrefix</code></pre>
+      <h3>macOS (Terminal)</h3>
+      <p>Chrome Canary:</p>
+      <pre><code>open -na "Google Chrome Canary" --args --user-data-dir="$TMPDIR/local-plus-chrome" --enable-features=LocalOnlyAppProtocolPrefix</code></pre>
+      <p>Edge Canary:</p>
+      <pre><code>open -na "Microsoft Edge Canary" --args --user-data-dir="$TMPDIR/local-plus-edge" --enable-features=LocalOnlyAppProtocolPrefix</code></pre>
+      <p>These commands use standard Canary installation locations and store demo profiles in your temporary directory.
+        Nothing else is installed. This page cannot enable or detect the feature.</p>
+    </details>
     <ol>
+      <li>Enable the feature using <strong>Set up your test browser</strong> above.</li>
       <li>Open DevTools with <kbd>F12</kbd> or <kbd>Ctrl+Shift+J</kbd> on Windows,
         or <kbd>Command+Option+J</kbd> on macOS. Select <strong>Console</strong> and make sure errors are visible.</li>
       <li>Click each link below separately. Compare the browser's console messages.
@@ -47,22 +96,20 @@
         <h2 id="ordinary-heading">Ordinary protocol</h2>
         <p><code>toydemo:hello</code></p>
         <a class="launch" href="toydemo:hello">Try ordinary protocol</a>
-        <p><strong>Expected:</strong> normal external-handler lookup. On Windows and macOS with no app registered,
-          the console reports that the scheme has no registered handler.</p>
+        <p><strong>Expected:</strong> the browser looks for an installed app. This demo hasn't installed one,
+          so on Windows and macOS the console reports that the scheme has no registered handler.</p>
       </section>
       <section class="card" aria-labelledby="local-heading">
         <h2 id="local-heading">Local-only protocol</h2>
         <p><code>local+toydemo:hello</code></p>
         <a class="launch" href="local+toydemo:hello">Try local-only protocol</a>
-        <p><strong>Expected with the feature enabled:</strong> the browser blocks the request before handler lookup:</p>
+        <p><strong>Expected with the feature enabled:</strong> the browser refuses the website's request before
+          looking for an app. The console reports:</p>
         <p><code>Not allowed to launch 'local+toydemo:hello'.</code></p>
       </section>
     </div>
 
-    <h2>What this demonstrates</h2>
-    <p>The browser checks the requested scheme for the literal <code>local+</code> prefix.
-      <code>toydemo:</code> and <code>local+toydemo:</code> are independent names, not aliases.
-      Even a deliberate click on a webpage is web-initiated.</p>
+    <p>Even a deliberate click on a webpage is web-initiated.</p>
     <p>These are expected outcomes, not live status indicators. A webpage cannot reliably tell whether an
       external app launched or read these browser-generated console messages.</p>
     <p>No app is supplied or installed. If you already have an app registered for either demo scheme, the ordinary
@@ -76,7 +123,7 @@
       <code>--disable-features=LocalOnlyAppProtocolPrefix</code>. Both links should then follow normal
       handler lookup, assuming no overriding policies or other restrictions.</p>
 
-    <h2>Limits</h2>
+    <h2>What this does not demonstrate</h2>
     <p>This demonstrates rejection, not successful app launching. Typing a local-only URL directly into the
       address bar retains the normal launch flow, but opening an app still requires a registered handler.</p>
     <p>This is browser enforcement, not OS access control. Administrator policies

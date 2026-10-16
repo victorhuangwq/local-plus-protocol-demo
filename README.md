@@ -1,20 +1,54 @@
 # local+ protocol demo
 
-A minimal, no-install website demonstrating Chromium's `local+` external-protocol block.
+A short guide and no-install browser demo for Windows and macOS app developers.
 
 **[Open the demo](https://victorhuangwq.github.io/local-plus-protocol-demo/)**
 
-No native app, extension, JavaScript, dependencies, or backend. The page contains two ordinary links:
+## Should websites be able to open this entry point in your app?
+
+Your desktop app may handle custom URLs so other native apps and websites can open it.
+Use `local+` for entry points that other native apps need to call, but websites should not launch.
+In supporting browsers with the feature enabled, the prefix blocks web-initiated launches of that scheme.
+Native apps can still call it through the OS.
+
+## What to register and what callers change
+
+| | Ordinary entry point | Local-only entry point |
+| --- | --- | --- |
+| Protocol your app registers | `myapp:` | `local+myapp:` |
+| URL another native app opens through the OS | `myapp:hello` | `local+myapp:hello` |
+| Website link in a supporting browser with the feature enabled | Normal app-opening flow | Blocked |
+
+On **Windows**, register `local+myapp` using your usual protocol-registration mechanism.
+On **macOS**, declare `local+myapp` in your app's URL schemes.
+Registration uses the scheme name without the trailing colon.
+
+Update callers to open the full URL, such as `local+myapp:hello`, and make sure your handler accepts the new scheme.
+The OS dispatches that URL to your app as usual.
+
+**It's a new protocol name, not a setting on the old one.** There is no automatic mapping between the two names.
+Keeping the old `myapp:` scheme wired to the same functionality leaves that entry point reachable from websites.
+
+**Keep validating incoming URLs.** This is a browser restriction, not authentication or OS-level protection.
+Unsupported browsers may not enforce it, and administrator policies can override it.
+
+## See the browser block, no app installation needed
+
+The demo uses `toydemo:` and `local+toydemo:`. No native app, extension, JavaScript, dependencies, or backend.
+Compare a request that reaches app lookup with one the browser rejects before lookup:
 
 | URL | Feature enabled, no registered handler (Windows/macOS) |
 | --- | --- |
-| `toydemo:hello` | Normal external-handler lookup; console reports no registered handler |
-| `local+toydemo:hello` | Blocked before handler lookup; console reports `Not allowed to launch 'local+toydemo:hello'.` |
+| `toydemo:hello` | The browser looks for an installed app. This demo hasn't installed one, so the console reports no registered handler. |
+| `local+toydemo:hello` | The browser refuses the website's request before looking for an app. The console reports `Not allowed to launch 'local+toydemo:hello'.` |
 
 These are expected results under the conditions below, not outcomes detected by the website.
 The page cannot read browser-generated console messages or reliably detect an external app launch.
 
 ## Browser setup
+
+<details>
+<summary>Set up your test browser</summary>
 
 Use the latest **Chrome Canary** or **Edge Canary** and explicitly enable `LocalOnlyAppProtocolPrefix`.
 
@@ -52,6 +86,8 @@ open -na "Microsoft Edge Canary" --args --user-data-dir="$TMPDIR/local-plus-edge
 
 The commands use standard Canary installation locations and store demo profiles in your temporary directory.
 Nothing else is installed.
+
+</details>
 
 ## Walkthrough
 
