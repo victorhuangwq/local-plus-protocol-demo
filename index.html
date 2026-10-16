@@ -28,6 +28,9 @@
     details { margin: 20px 0; border: 1px solid light-dark(#b9c4d1, #586577); border-radius: 12px; padding: 16px; }
     summary { cursor: pointer; font-weight: 650; }
     pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; background: light-dark(#f0f5ff, #172536); border-radius: 8px; }
+    figure { margin: 24px 0; }
+    figure img { display: block; width: 100%; height: auto; border-radius: 8px; }
+    figcaption { margin-top: 8px; font-size: .9rem; }
     footer { margin-top: 40px; border-top: 1px solid light-dark(#b9c4d1, #586577); padding-top: 20px; }
   </style>
 </head>
@@ -115,6 +118,16 @@
       external app launched or read these browser-generated console messages.</p>
     <p>No app is supplied or installed. If you already have an app registered for either demo scheme, the ordinary
       launch flow may offer to open it; cancel that prompt if you do not want to open the app.</p>
+
+    <h2>Example console output</h2>
+    <figure>
+      <a href="assets/protocol-console-example.png">
+        <img src="assets/protocol-console-example.png" width="1910" height="624" loading="lazy"
+          alt="Demo beside DevTools Console: toydemo:hello fails because no handler is registered, while local+toydemo:hello is not allowed to launch.">
+      </a>
+      <figcaption>Example with the feature enabled: ordinary protocol lookup versus the local-only block.
+        Select the screenshot to view it full size.</figcaption>
+    </figure>
 
     <h2>If both links behave the same</h2>
     <p>Update Chrome Canary or Edge Canary, fully quit it, and relaunch with
