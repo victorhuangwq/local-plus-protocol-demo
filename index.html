@@ -6,14 +6,14 @@
   <meta name="description" content="Use local+ URL schemes to block website launches of your desktop app in supporting browsers. Try the demo without installing an app.">
   <title>local+ protocol demo</title>
   <style>
-    :root { color-scheme: light dark; font: 17px/1.6 system-ui, sans-serif; }
+    :root { color-scheme: light dark; font: 16px/1.6 system-ui, sans-serif; }
     body { max-width: 820px; margin: 0 auto; padding: 32px 20px 56px; }
     h1, h2 { line-height: 1.2; }
-    h1 { font-size: clamp(2rem, 7vw, 3rem); margin-bottom: 12px; }
-    h2 { margin-top: 36px; font-size: 1.35rem; }
+    h1 { font-size: clamp(1.75rem, 5vw, 2.25rem); margin-bottom: 12px; }
+    h2 { margin-top: 36px; font-size: 1.25rem; }
     a { color: light-dark(#174bb3, #9cc1ff); }
     code { font-size: .9em; overflow-wrap: anywhere; }
-    .intro { font-size: 1.15rem; }
+    .intro { font-size: 1rem; }
     .notice, .card { border: 1px solid light-dark(#b9c4d1, #586577); border-radius: 12px; padding: 20px; }
     .notice { background: light-dark(#f0f5ff, #172536); }
     .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin-top: 24px; }
@@ -161,14 +161,18 @@
       <code>URLAllowlist</code>. A user's saved permission to open the app doesn't override the block.</p>
 
     <h2>Next steps</h2>
-    <p>For Windows, we're also exploring a registry-based approach so apps can mark an existing protocol
+    <p>For Windows, we're also exploring a
+      <a href="https://issues.chromium.org/issues/539654408">registry-based approach</a> so apps can mark an existing protocol
       as local-only without renaming it. That would let existing app-to-app callers keep using the same URLs.
       This is separate from the <code>local+</code> prefix shown in this demo and isn't available here yet.</p>
   </main>
   <footer>
     <a href="https://github.com/victorhuangwq/local-plus-protocol-demo">Source code</a>
     &middot;
-    <a href="https://issues.chromium.org/issues/539667062">Chromium issue (+1 to show interest)</a>
+    <a href="https://issues.chromium.org/issues/539667062">local+ prefix issue</a>
+    &middot;
+    <a href="https://issues.chromium.org/issues/539654408">Windows registry issue</a>
+    <p>+1 either issue to show interest.</p>
   </footer>
   <script>
     for (const link of document.querySelectorAll('a.launch')) {
