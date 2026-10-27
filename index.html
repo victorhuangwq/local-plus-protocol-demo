@@ -159,6 +159,11 @@
       from a website asking to open the URL.</p>
     <p>Admins can allow website launches through <code>AutoLaunchProtocolsFromOrigins</code> or, where supported,
       <code>URLAllowlist</code>. A user's saved permission to open the app doesn't override the block.</p>
+
+    <h2>Next steps</h2>
+    <p>For Windows, we're also exploring a registry-based approach so apps can mark an existing protocol
+      as local-only without renaming it. That would let existing app-to-app callers keep using the same URLs.
+      This is separate from the <code>local+</code> prefix shown in this demo and isn't available here yet.</p>
   </main>
   <footer>
     <a href="https://github.com/victorhuangwq/local-plus-protocol-demo">Source code</a>
