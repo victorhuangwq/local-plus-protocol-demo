@@ -23,8 +23,6 @@
     :focus-visible { outline: 3px solid light-dark(#7a3e00, #ffd08a); outline-offset: 4px; }
     li + li { margin-top: 10px; }
     h3 { font-size: 1.1rem; }
-    table { width: 100%; border-collapse: collapse; margin: 20px 0; table-layout: fixed; }
-    th, td { text-align: left; vertical-align: top; padding: 10px; border-bottom: 1px solid light-dark(#b9c4d1, #586577); overflow-wrap: anywhere; }
     details { margin: 20px 0; border: 1px solid light-dark(#b9c4d1, #586577); border-radius: 12px; padding: 16px; }
     summary { cursor: pointer; font-weight: 650; }
     pre { white-space: pre-wrap; overflow-wrap: anywhere; padding: 12px; background: light-dark(#f0f5ff, #172536); border-radius: 8px; }
@@ -37,39 +35,59 @@
 <body>
   <main>
     <h1>Local-only URLs for desktop apps</h1>
-    <p class="intro">Sometimes you want other apps to open your app through a URL, but not websites.
-      That's what the <code>local+</code> prefix is for.</p>
-    <p>If your Windows or macOS app handles URLs like <code>myapp:hello</code>, you can register
-      <code>local+myapp</code> instead. Browsers that support this feature block website launches of those URLs
-      when the feature is enabled. Other native apps can still open them through the OS.</p>
+    <p class="intro">A custom URL scheme lets other apps open your app. Websites can use it too,
+      even if you only intended it for app-to-app use.</p>
 
-    <h2>What changes for your app</h2>
-    <table>
-      <caption>With and without the local+ prefix</caption>
-      <thead><tr><th scope="col">Action</th><th scope="col">Without local+</th><th scope="col">With local+</th></tr></thead>
-      <tbody>
-        <tr><th scope="row">Register a scheme</th><td><code>myapp:</code></td><td><code>local+myapp:</code></td></tr>
-        <tr><th scope="row">URL other apps use</th><td><code>myapp:hello</code></td><td><code>local+myapp:hello</code></td></tr>
-        <tr><th scope="row">Website link, with browser support and the feature enabled</th><td>Browser can open the app</td><td>Blocked, unless an admin policy allows it</td></tr>
-      </tbody>
-    </table>
-    <p>On Windows, register <code>local+myapp</code> the same way you register any custom protocol.
-      On macOS, add it to your app's URL schemes. Leave off the colon when registering the name.</p>
-    <p>Update the apps that call yours to use <code>local+myapp:hello</code>, and check that your URL handler
-      accepts the new name. The browser won't translate <code>myapp:</code> into <code>local+myapp:</code> for you.</p>
-    <p>If you keep <code>myapp:</code> registered for the same actions, websites can still use that URL.
-      Adding a second name doesn't protect the old one.</p>
-    <p class="notice">Your app still needs to validate incoming URLs. This check happens in the browser,
-      not Windows or macOS. Browsers without the feature may allow the launch, and admins can make exceptions.</p>
+    <h2>The solution</h2>
+    <p>Register a scheme with the <code>local+</code> prefix, such as <code>local+myapp:</code>.
+      Browsers with the feature enabled block website requests to open it. Native apps can still use it
+      through the OS.</p>
 
-    <h2>Try it</h2>
-    <p>You don't need to install an app for this demo. Click the two links and compare the console messages:
-      one should report a missing app, the other a blocked launch.</p>
+    <h2>The problem</h2>
+    <p>You might register <code>myapp:</code> so another desktop app can open a file or start a task in yours.
+      A website can construct the same URL with its own parameters and ask the browser to launch it.</p>
+    <p>The browser usually asks the user before opening the app. But agreeing to open an app doesn't mean
+      the user understands what the URL will do. Your handler may never have been designed to process
+      requests from arbitrary websites.</p>
+    <p>Android already accounts for this. An app's intent filter must include
+      <a href="https://developer.android.com/training/app-links/create-deeplinks#adding-filters"><code>CATEGORY_BROWSABLE</code></a>
+      to receive links from a browser. Developers opt in to web access.</p>
+    <p>Ordinary custom-protocol registration on Windows and macOS doesn't make that distinction.
+      Changing the default would break existing web-to-app links, so <code>local+</code> lets developers
+      opt individual protocols out instead.</p>
+
+    <h2>Why it matters</h2>
+    <p>Your app may have access to files and settings that a webpage doesn't. A malicious site could
+      exploit a bug in your URL handler or trick a user into approving an unwanted action.</p>
+    <p>If websites don't need to use your protocol, you should be able to block them without breaking
+      calls from other apps.</p>
+
+    <h2>Use it in your app</h2>
+    <ol>
+      <li><strong>Pick a name.</strong> For example, <code>local+myapp</code>. If you also need a web-facing
+        protocol, keep it separate and limit what it can do.</li>
+      <li><strong>Register it.</strong> On Windows, use your app's existing custom-protocol registration.
+        On macOS, add it to your app's URL schemes. Leave off the colon when registering the name.
+        Configure your handler to accept the new name.</li>
+      <li><strong>Update callers.</strong> Change <code>myapp:hello</code> to <code>local+myapp:hello</code>
+        wherever another app calls yours. The prefix is part of the scheme name; old URLs won't be
+        converted automatically.</li>
+      <li><strong>Remove the old access.</strong> Once callers have migrated, unregister the old scheme
+        or remove its local-only actions. Otherwise, websites can still use it for those actions.</li>
+      <li><strong>Test both paths.</strong> Confirm that another native app can open the URL through the OS,
+        and that a webpage is blocked in a browser with the feature enabled.</li>
+    </ol>
+    <p class="notice">Keep validating incoming URLs. This is a browser restriction, not an OS restriction.
+      Other browsers may behave differently, and administrator policies can allow exceptions.</p>
+
+    <h2>Try the demo</h2>
+    <p>You don't need to install an app for this test. The page compares two links and shows where
+      the browser blocks the request.</p>
     <details id="browser-setup">
       <summary>Set up your test browser</summary>
-      <p>Use the latest Chrome Canary or Edge Canary. Quit it completely, including any background processes,
-        then run the command for your browser below. If it's still running, the flag may not take effect.</p>
-      <p>Open this page in the new window. You'll be using your usual Canary profile, settings, and sign-ins.</p>
+      <p>Use Chrome Canary or Edge Canary. Fully quit it first, including any background processes,
+        then run one command below. This uses your usual Canary profile, including its settings and sign-ins.</p>
+      <p>Open this page in the new window.</p>
       <h3>Windows (PowerShell)</h3>
       <p>Chrome Canary:</p>
       <pre><code>&amp; "$env:LOCALAPPDATA\Google\Chrome SxS\Application\chrome.exe" --enable-features=LocalOnlyAppProtocolPrefix</code></pre>
@@ -83,11 +101,13 @@
       <p>The commands assume Canary is installed in its usual location. They don't install anything.
         The page itself can't turn the feature on or check whether it's enabled.</p>
     </details>
+    <h3>Compare the links</h3>
     <ol>
-      <li>Follow the browser setup above to enable the feature.</li>
+      <li>Open this page in the browser you started with the feature enabled.</li>
       <li>Open DevTools with <kbd>F12</kbd> or <kbd>Ctrl+Shift+J</kbd> on Windows,
         or <kbd>Command+Option+J</kbd> on macOS. Choose Console and show both Info and Error messages.</li>
-      <li>Click each link below, one at a time. Look at the console for the result, not the page.</li>
+      <li>Click <code>toydemo:hello</code>. With no app registered, the browser reports a missing handler.</li>
+      <li>Click <code>local+toydemo:hello</code>. The browser blocks the request before looking for an app.</li>
     </ol>
 
     <div class="cards">
@@ -108,13 +128,12 @@
       </section>
     </div>
 
-    <p>The "Searching for..." line comes from this page and just confirms your click.
-      The browser's message after it tells you what happened. The page can't read that message or reliably
-      tell whether an app opened.</p>
+    <p>The page also logs "Searching for..." when you click. That's just a record of the click, not
+      confirmation that the browser found or opened an app. Look at the browser's message below it
+      for the result.</p>
     <p>If you've already registered an app for either demo URL, you may get a prompt to open it.
       Cancel if you don't want to launch it.</p>
 
-    <h2>Example console output</h2>
     <figure>
       <a href="assets/protocol-console-example.png">
         <img src="assets/protocol-console-example.png" width="1910" height="624" loading="lazy"
@@ -124,19 +143,20 @@
         <code>local+toydemo:</code>. Click the screenshot to enlarge it.</figcaption>
     </figure>
 
-    <h2>If both links behave the same</h2>
-    <p>Check that Canary is up to date and that you quit it completely before running the setup command.
-      Older builds can silently ignore a feature flag they don't recognize. On a work device, check whether
-      your organization's browser policies allow the launch.</p>
+    <h3>If both links behave the same</h3>
+    <p>Update Canary, fully quit it, and restart it with the command above. If it's already running,
+      the command may open a window without enabling the feature. On a managed device, administrator
+      policies may allow the launch.</p>
     <p>To compare with the feature off, quit Canary and run the same command with
       <code>--disable-features=LocalOnlyAppProtocolPrefix</code> instead.
       Both links should then look for an app, unless another browser rule or policy prevents it.</p>
 
-    <h2>Testing with your own app</h2>
-    <p>Register a <code>local+</code> scheme with your app, then try opening its URL from a webpage and
-      by entering it directly in the browser's address bar. With the feature enabled and no admin exception,
-      the webpage link is blocked, even when you click it yourself. The address-bar entry can still open
-      your app through the usual prompt. A native app can also open the URL through the OS.</p>
+    <h3>Testing with a real app</h3>
+    <p>This demo shows blocking, not a successful app launch. To test launching, register a handler
+      in your own app and open its URL from another native app.</p>
+    <p>Typing a <code>local+</code> URL directly into the browser's address bar also keeps the normal
+      app-launch flow. It still requires a registered handler and may show a prompt. That's different
+      from a website asking to open the URL.</p>
     <p>Admins can allow website launches through <code>AutoLaunchProtocolsFromOrigins</code> or, where supported,
       <code>URLAllowlist</code>. A user's saved permission to open the app doesn't override the block.</p>
   </main>
