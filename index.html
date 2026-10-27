@@ -42,6 +42,9 @@
     <p>Register a scheme with the <code>local+</code> prefix, such as <code>local+myapp:</code>.
       Browsers with the feature enabled block website requests to open it. Native apps can still use it
       through the OS.</p>
+    <p>The feature is disabled by default. To try it, launch Chrome Canary or Edge Canary with
+      <code>--enable-features=LocalOnlyAppProtocolPrefix</code>.
+      See <a href="#browser-setup">browser setup</a> below for the full commands.</p>
 
     <h2>The problem</h2>
     <p>You might register <code>myapp:</code> so another desktop app can open a file or start a task in yours.
@@ -85,6 +88,8 @@
       the browser blocks the request.</p>
     <details id="browser-setup">
       <summary>Set up your test browser</summary>
+      <p>The commands below pass <code>--enable-features=LocalOnlyAppProtocolPrefix</code> to turn on
+        the feature, which is disabled by default.</p>
       <p>Use Chrome Canary or Edge Canary. Fully quit it first, including any background processes,
         then run one command below. This uses your usual Canary profile, including its settings and sign-ins.</p>
       <p>Open this page in the new window.</p>
